@@ -39,7 +39,7 @@ public class FolderPacker {
                     }
                     });
                     if(files.length==1){
-                        TexturePacker.process(new Json().fromJson(TexturePacker.Settings.class,new FileReader(files[0])),file.getPath(), moveToName, "atlas");
+                        TexturePacker.process(new Json().fromJson(TexturePacker.Settings.class, new FileReader(files[0])), file.getPath(), moveToName, "atlas");
                     }else{
                       //  TexturePacker.Settings setting=new TexturePacker.Settings();
                       //  Json json=new Json();

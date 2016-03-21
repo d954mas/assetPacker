@@ -151,13 +151,14 @@ public class AtlasAsset extends AssetWithInlineClass {
         @Override
         public Set<String> getImports() {
             Set<String> imports=super.getImports();
-            imports.add("import com.badlogic.gdx.graphics.g2d.TextureAtlas;");
+            imports.add("import com.d954mas.assetpacker.UnloadableTextureAtlas;");
+            imports.add("import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;");
             return imports;
         }
 
         @Override
         public String getAssetClass() {
-            return "TextureAtlas";
+            return "UnloadableTextureAtlas";
         }
 
         @Override
@@ -179,12 +180,43 @@ public class AtlasAsset extends AssetWithInlineClass {
         }
 
         @Override
-        public List<String> getDestructor() {
+        public List<String> getInitAfterLoadingConstructor() {
             List<String> lines=new ArrayList<>();
-            lines.add(String.format("manager.unload(\"%s\");",getPath()));
-            lines.addAll(super.getDestructor());
+            lines.add(String.format("if(%s==null){",getAssetName()));
+            lines.add(String.format("    %s=new %s();",getAssetName(),getAssetClass(),getPath()));
+            lines.add("}");
+            lines.add(String.format("%s.load((TextureAtlasData)manager.get(\"%s\"));",getAssetName(),getPath()));
             return lines;
         }
+
+        @Override
+        public boolean needUnload() {
+            return true;
+        }
+
+        @Override
+        public List<String> getLoadDestructor() {
+            return super.getLoadDestructor();
+        }
+
+        @Override
+        public List<String> getLoadConstructor() {
+            return Cs.of(String.format("manager.load(\"%s\", TextureAtlasData.class);", getPath(), getAssetClass()));
+        }
+
+
+        @Override
+        public List<String> getDestructor() {
+            List<String> lines=new ArrayList<>();
+            lines.add(String.format("%s.dispose();",getAssetName()));
+         //   lines.addAll(super.getDestructor());
+            return lines;
+        }
+
+
+
+
+
     }
 
     protected static class AtlasRegionAsset extends Asset {
@@ -223,8 +255,13 @@ public class AtlasAsset extends AssetWithInlineClass {
         }
 
         @Override
+        public boolean needDestructor() {
+            return false;
+        }
+
+        @Override
         public List<String> getInitAfterLoadingConstructor() {
-            return Cs.of(String.format("%s = %s.findRegion(\"%s\");",getAssetName(),atlasName,getAssetName()));
+            return Cs.of(String.format("%s = %s.findRegion(\"%s\");", getAssetName(), atlasName, getAssetName()));
         }
     }
 
@@ -263,10 +300,14 @@ public class AtlasAsset extends AssetWithInlineClass {
             return true;
         }
 
+        @Override
+        public boolean needDestructor() {
+            return false;
+        }
 
         @Override
         public List<String> getInitAfterLoadingConstructor() {
-            return Cs.of(String.format("%s = %s.createPatch(\"%s\");",getAssetName(),atlasName,getAssetName()));
+            return Cs.of(String.format("%s = %s.createPatch(\"%s\");", getAssetName(), atlasName, getAssetName()));
         }
     }
 }

@@ -48,19 +48,19 @@ public abstract class Asset {
         return true;
     }
     public List<String> getConstructor(){
-        return Cs.of(String.format("%s = %s;",getAssetName(),"new "+getAssetClass()+"();"));
+        return Cs.of(String.format("%s = %s;", getAssetName(), "new " + getAssetClass() + "();"));
     };
     public boolean needDestructor(){
         return true;
     }
     public List<String> getDestructor(){
-        return Cs.of(String.format("%s = null;",getAssetName()));
+        return Cs.of(String.format("%s = null;", getAssetName()));
     }
     public boolean needInitAfterLoading(){
         return false;
     }
     public List<String> getInitAfterLoadingConstructor(){
-        return Cs.of(String.format("%s = manager.get(\"%s\");",getAssetName(),getPath()));
+        return Cs.of(String.format("%s = manager.get(\"%s\");", getAssetName(), getPath()));
     }
 
 

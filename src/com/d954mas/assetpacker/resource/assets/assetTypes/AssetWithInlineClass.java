@@ -22,7 +22,12 @@ public abstract class AssetWithInlineClass extends Asset {
     public List<String> getConstructor() {
         if(depth==0)throw new RuntimeException("AssetWithInlineClass: do not use this method if depth==0 ");
         else{
-            return Cs.of(String.format("%s = new %s(manager);",getAssetName(),getAssetClass()));
+            return Cs.of(
+                    String.format("if(%s == null){", getAssetName()),
+                    String.format(TAB+"%s = new %s(manager);", getAssetName(), getAssetClass()),
+                    "}else{",
+                    String.format(TAB+"%s.init(manager);", getAssetName()),
+                    "}");
         }
     }
 
@@ -31,7 +36,7 @@ public abstract class AssetWithInlineClass extends Asset {
     public List<String> getDestructor() {
         List<String> lines=new ArrayList<>();
         lines.add(String.format("%s.dispose(manager);",getAssetName()));
-        lines.addAll(super.getDestructor());
+       // lines.addAll(super.getDestructor());
         return lines;
     }
 
@@ -42,7 +47,7 @@ public abstract class AssetWithInlineClass extends Asset {
 
     @Override
     public List<String> getInitAfterLoadingConstructor() {
-        return Cs.of(String.format("%s.onLoadDone(manager);",getAssetName()));
+        return Cs.of(String.format("%s.onLoadDone(manager);", getAssetName()));
     }
     public String getAssetClass(){
         return "Res"+super.getAssetClass();
@@ -80,6 +85,14 @@ public abstract class AssetWithInlineClass extends Asset {
         List<String> onLoaders=new ArrayList<>();
         List<String> loaders=new ArrayList<>();
         List<String> unloaders=new ArrayList<>();
+
+        if(depth!=0){
+            fields.add(TAB+"private boolean isLoad;");
+            fields.add(TAB+"private boolean isInit;");
+        }else{
+            fields.add(TAB+"private static boolean isLoad;");
+            fields.add(TAB+"private static boolean isInit;");
+        }
 
         for(Asset asset:assets){
             if(depth!=0){
@@ -126,22 +139,25 @@ public abstract class AssetWithInlineClass extends Asset {
         //METHOD INIT
         if(depth!=0){
             result.append(additionalTab + TAB + "protected void init(AssetManager manager){\n");
+            result.append(additionalTab + TAB +TAB+"if(isInit)return;\n");
         }
         else {
             result.append(additionalTab+TAB+"public static void init(AssetManager manager){\n");
             result.append(additionalTab+TAB+TAB+"init(manager,false);\n");
             result.append(additionalTab+TAB+"}\n");
             result.append(additionalTab+TAB+"public static void init(AssetManager manager,boolean finishLoading){\n");
+            result.append(additionalTab + TAB +TAB+"if(isInit)return;\n");
         }
-        addLines(result,additionalTab+TAB+TAB,constructors);
-        addLines(result,additionalTab+TAB+TAB,loaders);
+        addLines(result, additionalTab + TAB + TAB, constructors);
+        addLines(result, additionalTab + TAB + TAB, loaders);
         if(depth==0) {
             result.append(additionalTab+TAB+TAB + "if(finishLoading){\n");
             result.append(additionalTab+TAB+TAB+TAB + "manager.finishLoading();\n");
             result.append(additionalTab+TAB+TAB+TAB + "onLoadDone(manager);\n");
             result.append(additionalTab+TAB+TAB + "}\n");
         }
-        result.append(additionalTab+TAB + "}\n");
+        result.append(additionalTab + TAB +TAB+"isInit=true;\n");
+        result.append(additionalTab + TAB + "}\n");
 
         //METHOD ONLOADDONE
         if(depth!=0){
@@ -149,11 +165,13 @@ public abstract class AssetWithInlineClass extends Asset {
         }else{
             result.append(additionalTab+TAB+"public static void onLoadDone(AssetManager manager){\n");
         }
-        addLines(result,additionalTab+TAB+TAB,onLoaders);
+        result.append(additionalTab + TAB +TAB+"if(isLoad)return;\n");
+        addLines(result, additionalTab + TAB + TAB, onLoaders);
         if(depth==0){
-            result.append(additionalTab+TAB+TAB+getAdditionalClass()+".onLoadDone();");
+            result.append(additionalTab+TAB+TAB+getAdditionalClass()+".onLoadDone();\n");
         }
-        result.append(additionalTab+TAB + "}\n");
+        result.append(additionalTab + TAB +TAB+"isLoad=true;\n");
+        result.append(additionalTab + TAB + "}\n");
 
         //METHOD DISPOSE
         if(depth!=0){
@@ -161,11 +179,16 @@ public abstract class AssetWithInlineClass extends Asset {
         }else{
             result.append(additionalTab+TAB+"public static void dispose(AssetManager manager){\n");
         }
-        addLines(result,additionalTab+TAB+TAB,unloaders);
+        result.append(additionalTab+TAB+TAB + "if(!isLoad){\n");
+        result.append(additionalTab+TAB+TAB+TAB + "return;\n");
+        result.append(additionalTab+TAB+TAB + "}\n");
+        addLines(result, additionalTab + TAB + TAB, unloaders);
         addLines(result,additionalTab+TAB+TAB,destructors);
         if(depth==0){
-            result.append(additionalTab+TAB+TAB+getAdditionalClass()+".dispose();");
+            result.append(additionalTab+TAB+TAB+getAdditionalClass()+".dispose();\n");
         }
+        result.append(additionalTab+TAB+TAB + "isInit=false;\n");
+        result.append(additionalTab+TAB+TAB + "isLoad=false;\n");
         result.append(additionalTab+TAB+TAB + "}\n");
 
         //add static classes
@@ -175,6 +198,7 @@ public abstract class AssetWithInlineClass extends Asset {
             }
         }
         result.append(additionalTab+"}"+"\n");
+
         return result.toString();
     }
 

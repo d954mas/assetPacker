@@ -20,7 +20,7 @@ public class FileHandleAsset extends Asset {
 
     @Override
     public List<String> getConstructor() {
-        return Cs.of(getAssetName()+" = "+"Gdx.files.internal(\""+file.getPath().replace("\\","/").replace("android/assets/","")+"\");");
+        return Cs.of(getAssetName() + " = " + "Gdx.files.internal(\"" + file.getPath().replace("\\", "/").replace("android/assets/", "") + "\");");
     }
 
     @Override
