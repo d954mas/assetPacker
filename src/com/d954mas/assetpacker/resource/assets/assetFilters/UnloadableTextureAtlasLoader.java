@@ -1,4 +1,4 @@
-package com.d954mas.assetpacker;
+package com.d954mas.assetpacker.resource.assets.assetFilters;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetLoaderParameters;
@@ -61,7 +61,7 @@ public class UnloadableTextureAtlasLoader extends SynchronousAssetLoader<Texture
 
         }
 
-        public UnloadableTextureAtlasParameter (boolean flip) {
+        public UnloadableTextureAtlasParameter(boolean flip) {
             this.flip = flip;
         }
     }

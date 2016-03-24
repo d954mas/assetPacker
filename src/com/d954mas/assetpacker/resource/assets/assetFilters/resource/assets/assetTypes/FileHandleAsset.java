@@ -1,7 +1,7 @@
-package com.d954mas.assetpacker.resource.assets.assetTypes;
+package com.d954mas.assetpacker.resource.assets.assetFilters.resource.assets.assetTypes;
 
 
-import com.d954mas.assetpacker.Cs;
+import com.d954mas.assetpacker.resource.assets.assetFilters.Cs;
 
 import java.io.File;
 import java.util.HashSet;
@@ -25,7 +25,7 @@ public class FileHandleAsset extends Asset {
 
     @Override
     public Set<String> getImports() {
-        Set<String> imports=new HashSet<String>();
+        Set<String> imports = new HashSet<String>();
         imports.addAll(super.getImports());
         imports.add("import com.badlogic.gdx.Gdx;");
         imports.add("import com.badlogic.gdx.files.FileHandle;");

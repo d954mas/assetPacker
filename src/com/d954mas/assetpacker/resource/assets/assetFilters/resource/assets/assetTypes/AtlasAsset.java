@@ -1,9 +1,9 @@
-package com.d954mas.assetpacker.resource.assets.assetTypes;
+package com.d954mas.assetpacker.resource.assets.assetFilters.resource.assets.assetTypes;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.utils.Array;
-import com.d954mas.assetpacker.Cs;
+import com.d954mas.assetpacker.resource.assets.assetFilters.Cs;
 
 import java.io.File;
 import java.util.*;
@@ -59,23 +59,24 @@ public class AtlasAsset extends AssetWithInlineClass {
         //if (region.flip) atlasRegion.flip(false, true);
         return atlasRegion;
     }
-    public Set<String> getImports(){
-        Set<String> imports=new HashSet<String>();
-        for(Asset asset:assets){
+
+    public Set<String> getImports() {
+        Set<String> imports = new HashSet<String>();
+        for (Asset asset : assets) {
             imports.addAll(asset.getImports());
         }
         return imports;
     }
 
     private List<MyAtlasRegion> getRegionsByName(String name, Array<TextureAtlas.TextureAtlasData.Region> regions) {
-        name=name.replaceAll("\\d*$", "");
-        Pattern p = Pattern.compile("^"+name+"[0-9]*");
+        name = name.replaceAll("\\d*$", "");
+        Pattern p = Pattern.compile("^" + name + "[0-9]*");
         Iterator<TextureAtlas.TextureAtlasData.Region> iterator = regions.iterator();
         List<MyAtlasRegion> list = new ArrayList<>();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             TextureAtlas.TextureAtlasData.Region region = iterator.next();
             Matcher matcher = p.matcher(region.name);
-            if(matcher.matches()){
+            if (matcher.matches()) {
                 list.add(getAtlasRegion(region));
                 iterator.remove();
             }
@@ -95,7 +96,7 @@ public class AtlasAsset extends AssetWithInlineClass {
 
         @Override
         public Set<String> getImports() {
-            Set<String> imports=super.getImports();
+            Set<String> imports = super.getImports();
             imports.add("import com.badlogic.gdx.graphics.g2d.Animation;");
             imports.add("import com.badlogic.gdx.utils.Array;");
             return imports;
@@ -124,13 +125,13 @@ public class AtlasAsset extends AssetWithInlineClass {
         //TODO заменить имя на индекс для скорости
         @Override
         public List<String> getInitAfterLoadingConstructor() {
-            List<String> lines=new ArrayList<>();
-            lines.add(String.format("//region animation %s",getAssetName()));
-            lines.add(String.format("Array<AtlasRegion> %sRegions = new Array<>();",getAssetName()));
+            List<String> lines = new ArrayList<>();
+            lines.add(String.format("//region animation %s", getAssetName()));
+            lines.add(String.format("Array<AtlasRegion> %sRegions = new Array<>();", getAssetName()));
             for (MyAtlasRegion atlasRegion : regions) {
-                lines.add(String.format("%sRegions.add(%s.findRegion(\"%s\"));",getAssetName(),atlasName,atlasRegion.name));
+                lines.add(String.format("%sRegions.add(%s.findRegion(\"%s\"));", getAssetName(), atlasName, atlasRegion.name));
             }
-            lines.add(String.format("%s = new %s(1f,%sRegions);",getAssetName(),getAssetClass(),getAssetName()));
+            lines.add(String.format("%s = new %s(1f,%sRegions);", getAssetName(), getAssetClass(), getAssetName()));
             lines.add("//endregion");
             return lines;
         }
@@ -141,9 +142,10 @@ public class AtlasAsset extends AssetWithInlineClass {
         public AtlasFileAsset(File file) {
             super(file);
         }
+
         @Override
         public Set<String> getImports() {
-            Set<String> imports=super.getImports();
+            Set<String> imports = super.getImports();
             imports.add("import com.d954mas.assetpacker.UnloadableTextureAtlas;");
             imports.add("import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;");
             return imports;
@@ -163,10 +165,12 @@ public class AtlasAsset extends AssetWithInlineClass {
         public boolean needConstructor() {
             return false;
         }
+
         @Override
         public boolean needDestructor() {
             return true;
         }
+
         @Override
         public boolean needInitAfterLoading() {
             return true;
@@ -174,11 +178,11 @@ public class AtlasAsset extends AssetWithInlineClass {
 
         @Override
         public List<String> getInitAfterLoadingConstructor() {
-            List<String> lines=new ArrayList<>();
-            lines.add(String.format("if(%s==null){",getAssetName()));
-            lines.add(String.format("    %s=new %s();",getAssetName(),getAssetClass(),getPath()));
+            List<String> lines = new ArrayList<>();
+            lines.add(String.format("if(%s==null){", getAssetName()));
+            lines.add(String.format("    %s=new %s();", getAssetName(), getAssetClass(), getPath()));
             lines.add("}");
-            lines.add(String.format("%s.load((TextureAtlasData)manager.get(\"%s\"));",getAssetName(),getPath()));
+            lines.add(String.format("%s.load((TextureAtlasData)manager.get(\"%s\"));", getAssetName(), getPath()));
             return lines;
         }
 
@@ -200,14 +204,11 @@ public class AtlasAsset extends AssetWithInlineClass {
 
         @Override
         public List<String> getDestructor() {
-            List<String> lines=new ArrayList<>();
-            lines.add(String.format("%s.dispose();",getAssetName()));
-         //   lines.addAll(super.getDestructor());
+            List<String> lines = new ArrayList<>();
+            lines.add(String.format("%s.dispose();", getAssetName()));
+            //   lines.addAll(super.getDestructor());
             return lines;
         }
-
-
-
 
 
     }
@@ -222,7 +223,7 @@ public class AtlasAsset extends AssetWithInlineClass {
 
         @Override
         public Set<String> getImports() {
-            Set<String> imports=super.getImports();
+            Set<String> imports = super.getImports();
             imports.add("import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;");
             return imports;
         }
@@ -268,7 +269,7 @@ public class AtlasAsset extends AssetWithInlineClass {
 
         @Override
         public Set<String> getImports() {
-            Set<String> imports=super.getImports();
+            Set<String> imports = super.getImports();
             imports.add("import com.badlogic.gdx.graphics.g2d.NinePatch;");
             return imports;
         }
